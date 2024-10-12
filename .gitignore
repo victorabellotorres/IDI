@@ -4,6 +4,8 @@ moc_*
 Makefile
 *.ui
 
+#archivos vscode
+.vscode*
 
 #ignorar archivos compilados
 *.o
