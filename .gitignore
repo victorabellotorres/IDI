@@ -1,0 +1,10 @@
+# ignorar archivos de qmake
+.qmake.stash
+moc_*
+Makefile
+*.ui
+
+
+#ignorar archivos compilados
+*.o
+*.exe
