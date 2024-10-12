@@ -2,7 +2,6 @@
 .qmake.stash
 moc_*
 Makefile
-*.ui
 
 #archivos vscode
 .vscode*
