@@ -29,7 +29,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     virtual void keyPressEvent (QKeyEvent *event);
 
   private:
-    void pintaUll();
+    void pintaUll(float percentatgeParpella);
     void pintaCap();
     void pintaMandibula(bool up, double angleApertura);
     
@@ -41,19 +41,29 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     
     void modelTransformQuadrat(glm::vec3 posicio, glm::vec3 escala);
     void modelTransformMandibula(bool up, double angleApertura);
+    void modelTransformMoureCocodril(float moureXcocodril);
     
     // program
     QOpenGLShaderProgram *program;
     // attribute locations
     GLuint vertexLoc, colorLoc;
     // uniform locations
-    GLuint TGLoc;
+    GLuint TGLoc, TGposLoc;
 
     // VAOs
     GLuint VAO_Quadrat_verd, VAO_Quadrat_blanc, VAO_Mandibula;
 
     // viewport
-    GLint ample, alt;    
+    GLint ample, alt;   
+
+    //Ángulo rotación mandíbula superior
+    float angulo;
+
+    // Coeficient que indica cuanto se cierra el parpado
+    float parpella;
+
+    // Posición x del cocodrilo
+    float posicioXcocodril;
     
     // colors
     glm::vec3 verd = glm::vec3(0.3,0.6,0.3);

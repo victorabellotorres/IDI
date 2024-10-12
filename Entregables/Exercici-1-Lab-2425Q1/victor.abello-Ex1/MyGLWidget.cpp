@@ -21,6 +21,8 @@ void MyGLWidget::initializeGL ()
   glClearColor (0.5, 0.7, 1.0, 1.0); // defineix color de fons (d'esborrat)
   carregaShaders();
   creaBuffers();
+
+  angulo = parpella = posicioXcocodril = 0;
 }
 
 void MyGLWidget::paintGL ()
@@ -31,19 +33,29 @@ void MyGLWidget::paintGL ()
   
   glClear (GL_COLOR_BUFFER_BIT);  // Esborrem el frame-buffer
 
+  modelTransformMoureCocodril(posicioXcocodril);
+
   pintaCap();
-  pintaUll();
-  pintaMandibula(false, 0.0);
+  pintaUll(parpella);
+
+  pintaMandibula(false, 0.0);// Mandíbula inferior
+  pintaMandibula(true, glm::radians(angulo)); // Mandíbula superior
       
   // Desactivem el VAO
   glBindVertexArray(0);
 }
 
-void MyGLWidget::pintaUll(){
+void MyGLWidget::pintaUll(float percentatgeParpella){
   // Pintem l'ull
   glBindVertexArray(VAO_Quadrat_blanc);
   modelTransformQuadrat(glm::vec3(-0.15, 0.25, 0.0), glm::vec3(0.2));
-  glDrawArrays(GL_TRIANGLES, 0, 6);    	
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+
+  // Pinterm parpella
+  glBindVertexArray(VAO_Quadrat_verd);
+  modelTransformQuadrat(glm::vec3(-0.15, 0.25, 0.0), glm::vec3(0.2, 0.2*percentatgeParpella, 0.2));
+  glDrawArrays(GL_TRIANGLES, 0, 6);
+
 }	
 
 void MyGLWidget::pintaCap(){
@@ -69,8 +81,33 @@ void MyGLWidget::modelTransformQuadrat(glm::vec3 posicio, glm::vec3 escala)
 
 void MyGLWidget::modelTransformMandibula(bool up, double angleApertura)
 {
+  float escala = 0.6;
   glm::mat4 TG(1.0f);
+  if (up == true) { // Mandíbula superior
+      // abrir la mandíbula
+      float aux_tx = escala*(1.0/(4*2)); // distancia x de medio diente
+      TG = glm::translate(TG, glm::vec3(-aux_tx, 0.0, 0.0));
+      TG = glm::rotate(TG, float(angleApertura), glm::vec3(0.0, 0.0, 1.0));
+      TG = glm::translate(TG, glm::vec3(+aux_tx, 0.0, 0.0));
+
+      //colocar la mandíbula cerrada en su sitio
+      aux_tx = escala * (1/2.0 - 1.0/(4*2)); //4 s el numero de dientes y lo multiplico por 2 porque se tiene que desplazar medio diente
+      TG = glm::translate(TG, glm::vec3(aux_tx, 0.0, 0.0)); // ponerlo en la posición con la boca cerrada
+      TG = glm::rotate(TG, float(M_PI), glm::vec3(0.0, 0.0, 1.0)); // rotación 180 grados
+      TG = glm::translate(TG, glm::vec3(-(1*escala/2), -(0.2*escala), 0.0)); // se coloca con el centro de la caja contenedora de la mandíbula en la posición (0,0,0)
+
+  } else { // Mandíbula inferior
+    TG = glm::translate(TG, glm::vec3(0.0, -(0.2*2*escala), 0.0)); // puntes de dent = 0 (0.2 es la altura de la mandibula/2, 0.6 la escala que se aplica a la mandíbula)
+  }
+
+  TG = glm::scale(TG, glm::vec3(escala));
   glUniformMatrix4fv(TGLoc, 1, GL_FALSE, &TG[0][0]);
+}
+
+void modelTransformMoureCocodril(float moureXcocodril) { // utiliza otra TG para mover el cocodrilo (ya que afecta a todos los VAO'S)
+  glm::mat4 TGpos(1.0f);
+  TGpos = glm::translate(TGpos, glm::vec3(moureXcocodril, 0.0, 0.0));
+  glUniformMatrix4fv(TGLoc, 1, GL_FALSE, &TGpos[0][0]);
 }
 
 void MyGLWidget::resizeGL (int w, int h)
@@ -92,16 +129,20 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
   makeCurrent();
   switch (event->key()) {
     case Qt::Key_Up: 
+      if (angulo < 45) angulo += 5;
     	break;
     case Qt::Key_Down: 
+      if (angulo > 0) angulo -= 5;
     	break;
     case Qt::Key_Right: 
     	break;
     case Qt::Key_Left: 
     	break;
-    case Qt::Key_W: 
+    case Qt::Key_W:
+      if (parpella < 1) parpella += 0.1;
     	break;
     case Qt::Key_S: 
+      if (parpella > 0) parpella -= 0.1;
     	break;		
     default: event->ignore(); break;
   }
@@ -183,8 +224,11 @@ void MyGLWidget::creaBuffersMandibula()
       Vertices[i++] = glm::vec3(x+toothWidth/2, 2*h, 0.0);
       Vertices[i++] = glm::vec3(x+toothWidth, h, 0.0);
   }
-  for(int i=0;i<numVertexs;i++) {
-      Colors[i]=black;
+
+  for (int i = 0; i < 6;i++) Colors[i] = verd; // Base de la mandíbula
+  for(int i=6;i<numVertexs;i++) {
+    if (Vertices[i][1] == 2*h) Colors[i] = blanc_dent; // Coloreamos las puntas de los dientes mirando a que altura([i][1]) esta el vértice.
+    else Colors[i]=blanc;
   }
 
   // Creació del Vertex Array Object (VAO) que usarem per pintar
@@ -231,5 +275,10 @@ void MyGLWidget::carregaShaders()
   vertexLoc = glGetAttribLocation (program->programId(), "vertex");
   colorLoc = glGetAttribLocation (program->programId(), "color");
   // Obtenim els identificadors dels uniforms
-  TGLoc = glGetUniformLocation(program->programId(), "TG"); 
+  TGLoc = glGetUniformLocation(program->programId(), "TG");
+  TGposLoc = glGetUniformLocation(program->programId(), "TGpos");
+
+  if (TGposLoc == -1) {
+    std::cerr << "Error: TGpos no encontrado en el shader." << std::endl;
+  }
 }
