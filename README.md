@@ -9,9 +9,9 @@ Para compilar un ejercicio, sigue estos pasos:
    Desde la carpeta correspondiente del ejercicio, ejecuta el siguiente comando para generar el `Makefile`:
    ```bash
    qmake
-
+   ```
 2. Ahora ya puedes ejecutar 
    ```bash 
    make
-
+   ```
    para compilar.
