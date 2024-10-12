@@ -99,15 +99,15 @@ void MyGLWidget::modelTransformMandibula(bool up, double angleApertura)
   } else { // Mandíbula inferior
     TG = glm::translate(TG, glm::vec3(0.0, -(0.2*2*escala), 0.0)); // puntes de dent = 0 (0.2 es la altura de la mandibula/2, 0.6 la escala que se aplica a la mandíbula)
   }
-
   TG = glm::scale(TG, glm::vec3(escala));
   glUniformMatrix4fv(TGLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
-void modelTransformMoureCocodril(float moureXcocodril) { // utiliza otra TG para mover el cocodrilo (ya que afecta a todos los VAO'S)
+void MyGLWidget::modelTransformMoureCocodril(float moureXcocodril)
+{ // utiliza otra TG para mover el cocodrilo (ya que afecta a todos los VAO'S)
   glm::mat4 TGpos(1.0f);
   TGpos = glm::translate(TGpos, glm::vec3(moureXcocodril, 0.0, 0.0));
-  glUniformMatrix4fv(TGLoc, 1, GL_FALSE, &TGpos[0][0]);
+  glUniformMatrix4fv(TGposLoc, 1, GL_FALSE, &TGpos[0][0]);
 }
 
 void MyGLWidget::resizeGL (int w, int h)
@@ -135,8 +135,10 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
       if (angulo > 0) angulo -= 5;
     	break;
     case Qt::Key_Right: 
+      posicioXcocodril += 0.02;
     	break;
     case Qt::Key_Left: 
+      posicioXcocodril -= 0.02;
     	break;
     case Qt::Key_W:
       if (parpella < 1) parpella += 0.1;
@@ -277,8 +279,4 @@ void MyGLWidget::carregaShaders()
   // Obtenim els identificadors dels uniforms
   TGLoc = glGetUniformLocation(program->programId(), "TG");
   TGposLoc = glGetUniformLocation(program->programId(), "TGpos");
-
-  if (TGposLoc == -1) {
-    std::cerr << "Error: TGpos no encontrado en el shader." << std::endl;
-  }
 }

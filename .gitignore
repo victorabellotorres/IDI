@@ -2,10 +2,19 @@
 .qmake.stash
 moc_*
 Makefile
+ui_Form.h
+ui_MyForm.h
 
 #archivos vscode
 .vscode*
+.vscode/*
+**/c_cpp_properties.json
 
 #ignorar archivos compilados
 *.o
-*.exe
+*.ex
+
+# Ignorar archivos específicos
+Exercici-1
+Bloc1_Exemple
+miprograma
