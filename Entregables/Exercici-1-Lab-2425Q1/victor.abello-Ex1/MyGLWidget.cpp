@@ -51,7 +51,7 @@ void MyGLWidget::pintaUll(float percentatgeParpella){
   modelTransformQuadrat(glm::vec3(-0.15, 0.25, 0.0), glm::vec3(0.2));
   glDrawArrays(GL_TRIANGLES, 0, 6);
 
-  // Pinterm parpella
+  // Pintem parpella
   glBindVertexArray(VAO_Quadrat_verd);
   modelTransformQuadrat(glm::vec3(-0.15, 0.25, 0.0), glm::vec3(0.2, 0.2*percentatgeParpella, 0.2));
   glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -104,7 +104,7 @@ void MyGLWidget::modelTransformMandibula(bool up, double angleApertura)
 }
 
 void MyGLWidget::modelTransformMoureCocodril(float moureXcocodril)
-{ // utiliza otra TG para mover el cocodrilo (ya que afecta a todos los VAO'S)
+{ // utiliza otra TG para mover el cocodrilo (ya que la TGpos es igual para todos los VAO'S)
   glm::mat4 TGpos(1.0f);
   TGpos = glm::translate(TGpos, glm::vec3(moureXcocodril, 0.0, 0.0));
   glUniformMatrix4fv(TGposLoc, 1, GL_FALSE, &TGpos[0][0]);
