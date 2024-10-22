@@ -47,8 +47,9 @@ int MyGLWidget::printOglError(const char file[], int line, const char func[])
 }
 
 void MyGLWidget::creaBuffers () {
-    m.load ("../models/HomerProves.obj");
 
+    // HOMER-------------------------------------------
+    m.load ("../../models/HomerProves.obj");
     glGenVertexArrays(1, &VAO_Homer);
     glBindVertexArray(VAO_Homer);
 
@@ -74,6 +75,48 @@ void MyGLWidget::creaBuffers () {
     glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(colorLoc);
 
+    
+    //Suelo -------------------------------------------------
+
+    glGenVertexArrays(1, &VAO_Suelo);
+    glBindVertexArray(VAO_Suelo);
+
+    glm::vec3 VerticesSuelo[6];
+    VerticesSuelo[0] = glm::vec3(-2.0, 0.0, -2.0);
+    VerticesSuelo[1] = glm::vec3(2.0, 0.0, 2.0);
+    VerticesSuelo[2] = glm::vec3(-2.0, 0.0, 2.0);
+    VerticesSuelo[3] = glm::vec3(-2.0, 0.0, -2.0);
+    VerticesSuelo[4] = glm::vec3(2.0, 0.0, -2.0);
+    VerticesSuelo[5] = glm::vec3(2.0, 0.0, 2.0);
+
+    glm::vec3 ColorSuelo[6];
+    for (int i = 0; i < 6; ++i) {
+        ColorSuelo[i] = glm::vec3(1.0, 0.0, 0.75);
+    }
+
+    GLuint VBO_Suelo[2];
+    glGenBuffers(2, VBO_Suelo);
+
+    //posicion
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_Suelo[0]);
+    glBufferData (GL_ARRAY_BUFFER,
+                sizeof(VerticesSuelo),
+                VerticesSuelo, GL_STATIC_DRAW);// posició
+    
+    // Activem l'atribut vertexLoc
+    glVertexAttribPointer(vertexLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(vertexLoc);
+
+    //color
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_Suelo[1]);
+    glBufferData (GL_ARRAY_BUFFER,
+                sizeof(ColorSuelo),
+                ColorSuelo, GL_STATIC_DRAW); // color// color
+    
+    // Activem l'atribut colorLoc
+    glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(colorLoc);
+
     glBindVertexArray (0);
 }
 
@@ -86,14 +129,25 @@ void MyGLWidget::paintGL ( )
     // Esborrem el frame-buffer
     glClear (GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
-    // Carreguem la transformació de model
-    modelTransform ();
+    //PintarHomer-------------------------------------
+
+    // Carreguem la transformació del Homer
+    modelTransformHomer ();
 
     // Activem el VAO per a pintar la caseta 
     glBindVertexArray (VAO_Homer);
 
     // pintem
     glDrawArrays(GL_TRIANGLES, 0, m.faces().size()*3);
+
+
+    //PintarSuelo-------------------------------------
+
+    // Carreguem la transformació de model
+    modelTransformSuelo();
+    
+    glBindVertexArray(VAO_Suelo);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glBindVertexArray (0);
 }
@@ -114,11 +168,27 @@ void MyGLWidget::initializeGL ( ) {
     projectTransform();
 
     glEnable (GL_DEPTH_TEST); // acitvar el Z-Buffer
+
+    angulo = 0;
 }
+
+
 
 void MyGLWidget::modelTransform () 
 {
     BL2GLWidget::modelTransform();
+}
+
+void MyGLWidget::modelTransformHomer() {
+    glm::mat4 TG(1.0f);
+    TG = glm::rotate(TG, angulo, glm::vec3(0, 1, 0));
+    glUniformMatrix4fv(transLoc, 1, GL_FALSE, &TG[0][0]);
+}
+
+void MyGLWidget::modelTransformSuelo() {
+    glm::mat4 TG(1.0f);
+    TG = glm::translate(TG, glm::vec3(0, -1, 0));
+    glUniformMatrix4fv(transLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
 void MyGLWidget::viewTransform () {
@@ -132,6 +202,21 @@ void MyGLWidget::projectTransform () {
     // glm::perspective (FOV en radians, ra window, znear, zfar)
     glm::mat4 Proj = glm::perspective (float(M_PI)/2.0f, 1.0f, 0.4f, 3.0f);
     glUniformMatrix4fv (PMLoc, 1, GL_FALSE, &Proj[0][0]);
+}
+
+void MyGLWidget::keyPressEvent (QKeyEvent *event) {
+    BL2GLWidget::keyPressEvent(event);
+    makeCurrent();
+    makeCurrent();
+  switch (event->key()) {
+    case Qt::Key_R: { // escalar a més gran
+      angulo += M_PI/4;//45 grados
+      break;
+    }
+    default: event->ignore(); break;
+  }
+  update();
+
 }
 
 MyGLWidget::~MyGLWidget() {

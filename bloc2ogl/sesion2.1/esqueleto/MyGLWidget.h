@@ -15,16 +15,21 @@ class MyGLWidget : public BL2GLWidget {
   virtual void initializeGL ( );
   virtual void modelTransform();
   virtual void paintGL ( );
+  virtual void keyPressEvent (QKeyEvent *event);
 
-
+//funciones creadas en esta clase hijo
+  void modelTransformHomer();
+  void modelTransformSuelo();
   void viewTransform();
   void projectTransform();
 
   Model m; // un únic model
 
-  GLuint VAO_Homer;
+  GLuint VAO_Homer, VAO_Suelo;
 
   GLuint PMLoc, VMLoc;
+
+  float angulo;
 
   private:
     int printOglError(const char file[], int line, const char func[]);
