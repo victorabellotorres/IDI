@@ -51,30 +51,32 @@ void MyGLWidget::creaBuffers () {
     // HOMER-------------------------------------------
     m.load ("../../models/Patricio.obj");
 
-    glGenVertexArrays(1, &VAO_Patricio);
-    glBindVertexArray(VAO_Patricio);
+    glGenVertexArrays(4, VAO_Patricio);
+    for (int i = 0; i < 4; ++i) {
+        glBindVertexArray(VAO_Patricio[i]);
 
-    GLuint VAO_Patricio[2];
-    glGenBuffers(2, VAO_Patricio);
+        GLuint VBO_Patricio[2];
+        glGenBuffers(2, VBO_Patricio);
 
-    //posicion
-    glBindBuffer(GL_ARRAY_BUFFER, VAO_Patricio[0]);
-    glBufferData (GL_ARRAY_BUFFER,
-                sizeof(GLfloat) * m.faces ().size () * 3 * 3,
-                m.VBO_vertices (), GL_STATIC_DRAW);// posició
+        //posicion
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_Patricio[0]);
+        glBufferData (GL_ARRAY_BUFFER,
+                    sizeof(GLfloat) * m.faces ().size () * 3 * 3,
+                    m.VBO_vertices (), GL_STATIC_DRAW);// posició
 
-    // Activem l'atribut vertexLoc
-    glVertexAttribPointer(vertexLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(vertexLoc);
+        // Activem l'atribut vertexLoc
+        glVertexAttribPointer(vertexLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(vertexLoc);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VAO_Patricio[1]);
-    glBufferData (GL_ARRAY_BUFFER,
-                sizeof(GLfloat) * m.faces ().size () * 3 * 3,
-                m.VBO_matdiff (), GL_STATIC_DRAW); // color
+        glBindBuffer(GL_ARRAY_BUFFER, VBO_Patricio[1]);
+        glBufferData (GL_ARRAY_BUFFER,
+                    sizeof(GLfloat) * m.faces ().size () * 3 * 3,
+                    m.VBO_matdiff (), GL_STATIC_DRAW); // color
 
-    // Activem l'atribut colorLoc
-    glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(colorLoc);
+        // Activem l'atribut colorLoc
+        glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+        glEnableVertexAttribArray(colorLoc);
+    }
 
     
     //Suelo -------------------------------------------------
@@ -135,14 +137,15 @@ void MyGLWidget::paintGL ( )
     projectTransform();
 
     //PintaPatricio-------------------------------------
+    for (int i = 0; i < 3 ; ++i) {
+        modelTransformPatricio (pos_rot_Patricio[i].position, pos_rot_Patricio[i].rotation, false);
+        glBindVertexArray (VAO_Patricio[i]);
+        glDrawArrays(GL_TRIANGLES, 0, m.faces().size()*3);
+    }
 
-    // Carreguem la transformació del Patricio
-    modelTransformPatricio ();
-
-    // Activem el VAO per a pintar la caseta 
-    glBindVertexArray (VAO_Patricio);
-
-    // pintem
+    // Pintar Patricio animat
+    modelTransformPatricio (pos_rot_Patricio[3].position, pos_rot_Patricio[3].rotation, true);
+    glBindVertexArray (VAO_Patricio[3]);
     glDrawArrays(GL_TRIANGLES, 0, m.faces().size()*3);
 
 
@@ -171,12 +174,28 @@ void MyGLWidget::initializeGL ( ) {
 
     glEnable (GL_DEPTH_TEST); // acitvar el Z-Buffer
 
+    connect (&timer, SIGNAL (timeout()), this, SLOT (animar ())); // conectar el timeout() del timer a la funcion animar() de public slot de la clase this
+    timer.start(16); // cada 16 milisegundos
+
+
+    pos_rot_Patricio[0].position = glm::vec3(2.0, 0.0, 2.0);
+    pos_rot_Patricio[0].rotation =  0*(M_PI/180.f);
+    pos_rot_Patricio[1].position = glm::vec3(0.0, 0.0, 0.0);
+    pos_rot_Patricio[1].rotation =  90*(M_PI/180.f);
+    pos_rot_Patricio[2].position = glm::vec3(-2.0, 0.0, -2.0);
+    pos_rot_Patricio[2].rotation =  180*(M_PI/180.f);
+    pos_rot_Patricio[3].position = glm::vec3(1.5, 0.0, 0.0);
+    pos_rot_Patricio[3].rotation =  0*(M_PI/180.f);
+
+
+
     //Calculo caja contenedora patricio
     centroYAlturaModelo(m, centroModelo, alturaModelo);
 
     angulo = 0;
+    
     //Pmin sacados del tamaño del suelo y la altura de homer que es 2
-    Pmin = glm::vec3(-2.5, 4.0, -2.5);
+    Pmin = glm::vec3(-2.5, 1.0, -2.5);
     Pmax = glm::vec3(2.5, 0.0, 2.5);
     relacionAspecto = 1.0f;
 
@@ -237,11 +256,13 @@ void MyGLWidget::modelTransform ()
     BL2GLWidget::modelTransform();
 }
 
-void MyGLWidget::modelTransformPatricio() {
+void MyGLWidget::modelTransformPatricio(glm::vec3 pos, float y_rotation, bool animacio) {
     glm::mat4 TG(1.0f);
-    TG = glm::translate(TG, glm::vec3(0, 2, 0));
-    TG = glm::rotate(TG, angulo, glm::vec3(0, 1, 0));
-    TG = glm::scale(TG, glm::vec3(4.0f/alturaModelo, 4.0f/alturaModelo, 4.0f/alturaModelo));
+    if (animacio) TG = glm::rotate(TG, angulo, glm::vec3(0, 1, 0)); // rotacion sobre y de la animacion
+    TG = glm::translate(TG, pos); // mover el centro de la base contenedora donde queramos
+    TG = glm::translate(TG, glm::vec3(0, 0.5, 0));
+    TG = glm::rotate(TG, y_rotation, glm::vec3(0, 1, 0)); // y_rotation is the initial angle
+    TG = glm::scale(TG, glm::vec3(1.0f/alturaModelo, 1.0f/alturaModelo, 1.0f/alturaModelo));
     TG = glm::translate(TG, -centroModelo);
     glUniformMatrix4fv(transLoc, 1, GL_FALSE, &TG[0][0]);
 }
@@ -257,7 +278,7 @@ void MyGLWidget::viewTransform () {
     //vrp = centro
     //glm::vec3 obs = centro + glm::vec3(0, 0, distanciaVRPOBS);
 
-    //Crear viewMatrix a partir de los angulos de euler
+    //Crear viewMatrix a partir de los s de euler
     glm::mat4 View(1.0f);
     View = glm::translate(View, glm::vec3(0, 0, -distanciaVRPOBS));
     View = glm::rotate(View, theta, glm::vec3(1, 0, 0));
@@ -286,10 +307,7 @@ void MyGLWidget::projectTransform () {
 void MyGLWidget::keyPressEvent (QKeyEvent *event) {
     BL2GLWidget::keyPressEvent(event);
     makeCurrent();
-  switch (event->key()) {
-    case Qt::Key_R:  // escalar a més gran
-      angulo += M_PI/4;//45 grados
-      break;
+    switch (event->key()) {
     case Qt::Key_O: // cambiar perspectiva a ortogonal
         if (modoCamara == Perspectiva) modoCamara = Ortogonal;
         else modoCamara = Perspectiva;
@@ -301,8 +319,8 @@ void MyGLWidget::keyPressEvent (QKeyEvent *event) {
         if (zoom + 0.1 <= 2) zoom += 0.1;
     break;
     default: event->ignore(); break;
-  }
-  update();
+    }
+    update();
 
 }
 
@@ -338,6 +356,12 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent* e) {
     }
 }
 
+
+void MyGLWidget::animar() {
+    makeCurrent();
+    angulo -= 4.f*(M_PI/180);
+    update();
+}
 
 
 void MyGLWidget::CentroYRadioEsferaContenedora(glm::vec3 Pmax, glm::vec3 Pmin, glm::vec3 &centro, float &radio) {

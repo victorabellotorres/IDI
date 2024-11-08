@@ -2,9 +2,13 @@
 #include "BL2GLWidget.h"
 #include "model.h"
 #include <QMouseEvent>
+#include <QTimer>
 
 class MyGLWidget : public BL2GLWidget {
   Q_OBJECT
+
+  public slots: // funciónes que se puede usar con signals
+    void animar();
 
   public:
     MyGLWidget(QWidget *parent=0) : BL2GLWidget(parent) {}
@@ -20,7 +24,7 @@ class MyGLWidget : public BL2GLWidget {
   virtual void resizeGL (int width, int height);
 
 //funciones creadas en esta clase hijo
-  void modelTransformPatricio();
+  void modelTransformPatricio(glm::vec3 pos, float rotation, bool animacio);
   void modelTransformSuelo();
   void viewTransform();
   void projectTransform();
@@ -32,10 +36,24 @@ class MyGLWidget : public BL2GLWidget {
 
 
 
+  struct pos_rot {
+    glm::vec3 position;
+    float rotation;
+  };
+
+  enum ModoProyeccion {
+    Perspectiva,
+    Ortogonal
+  };
+
 
   Model m; // un únic model
 
-  GLuint VAO_Patricio, VAO_Suelo;
+  QTimer timer;
+
+  GLuint VAO_Suelo;
+  GLuint VAO_Patricio[4];
+  pos_rot pos_rot_Patricio[4]; 
 
   GLuint PMLoc, VMLoc;
 
@@ -52,11 +70,6 @@ class MyGLWidget : public BL2GLWidget {
   float current_x, current_y, old_x, old_y;
 
   bool mouseActivo;
-
-  enum ModoProyeccion {
-    Perspectiva,
-    Ortogonal
-  };
 
   ModoProyeccion modoCamara;
 
