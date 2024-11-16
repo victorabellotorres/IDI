@@ -25,6 +25,7 @@ class MyGLWidget : public LL2GLWidget {
     virtual void initializeGL();
     virtual void iniEscena (); 
     virtual void mouseMoveEvent(QMouseEvent *e);
+    virtual void resizeGL (int width, int height);
 
     void modelTransformLego(glm::vec3 pos); 
     void rebotaParets();
@@ -36,8 +37,9 @@ class MyGLWidget : public LL2GLWidget {
 
     bool mostrarPilota;
     float left, right, bottom, top;
+    float FOVoptimo, FOV;
 
-    typedef enum ModoProyeccion {
+    enum ModoProyeccion {
       Perspectiva,
       Ortogonal
     };

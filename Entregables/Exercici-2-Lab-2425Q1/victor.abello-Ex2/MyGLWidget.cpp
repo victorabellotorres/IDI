@@ -6,8 +6,6 @@
 #define CHECK() printOglError(__FILE__, __LINE__,__FUNCTION__)
 #define DEBUG() std::cout << __FILE__ << " " << __LINE__ << " " << __FUNCTION__ << std::endl;
 
-//TODO: resize y tecla R
-
 MyGLWidget::MyGLWidget(QWidget *parent=0) : LL2GLWidget(parent) 
 {
 }
@@ -63,6 +61,7 @@ void MyGLWidget::initializeGL ()
     modoCamara = Perspectiva;
     left = bottom = -radiEscena;
     right = top = radiEscena;
+    FOVoptimo = FOV = float(2*asin(radiEscena/(2*radiEscena)));
 }
 
 void MyGLWidget::paintGL ()
@@ -116,6 +115,25 @@ void MyGLWidget::paintGL ()
   glBindVertexArray (0);
 }
 
+void MyGLWidget::resizeGL (int width, int height) {
+  LL2GLWidget::resizeGL(width, height);
+
+  if (ra > 1) {
+    left = -radiEscena*ra;
+    right = radiEscena*ra;
+    bottom = -radiEscena;
+    top = radiEscena;
+
+  } else {
+    left = -radiEscena;
+    right = radiEscena;
+    bottom = -radiEscena/ra;
+    top = radiEscena/ra;
+
+    FOV = 2*atan(tan(FOVoptimo/2)/ra);
+  }
+}
+
 void MyGLWidget::modelTransformLego (glm::vec3 pos)
 {
   glm::mat4 TG(1.0f);
@@ -146,7 +164,7 @@ void MyGLWidget::projectTransform ()
   glm::mat4 Proj(1.0f);
   if (modoCamara == Perspectiva)
   {
-    Proj = glm::perspective (float(2*asin(radiEscena/(2*radiEscena))), ra, (2.f*radiEscena)-radiEscena, (2.f*radiEscena)+radiEscena);
+    Proj = glm::perspective (FOV, ra, (2.f*radiEscena)-radiEscena, (2.f*radiEscena)+radiEscena);
     glUniformMatrix4fv (projLoc, 1, GL_FALSE, &Proj[0][0]);
   }
   else if (modoCamara == Ortogonal)
@@ -180,6 +198,9 @@ void MyGLWidget::iniEscena()
   radiEscena = sqrt(24*24 + 16*16 + 4*4)/2;
   psi = 0;
   theta = float(glm::radians(45.f));
+  modoCamara = Perspectiva;
+  mostrarPilota = true;
+  if (timer.isActive()) timer.stop();
 }
 
 void MyGLWidget::keyPressEvent(QKeyEvent* event) 
@@ -211,6 +232,7 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
       break;
         }           
     case Qt::Key_R: { 
+        iniEscena();
       break;
         }  
     default: event->ignore(); break;
