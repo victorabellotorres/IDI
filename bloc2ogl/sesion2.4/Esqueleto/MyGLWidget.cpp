@@ -131,7 +131,7 @@ void MyGLWidget::paintGL ( )
     glClear (GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
 
-    
+    viewTransform();
     projectTransform();
 
     //PintaPatricio-------------------------------------
@@ -320,7 +320,6 @@ void MyGLWidget::mouseReleaseEvent(QMouseEvent* e) {
 
 void MyGLWidget::mouseMoveEvent(QMouseEvent* e) {
     if (mouseActivo) {
-        makeCurrent();
         current_x = e->x();
         current_y = e->y();
 
@@ -334,7 +333,7 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent* e) {
 
         old_x = current_x;
         old_y = current_y;
-        viewTransform();
+
         update();
     }
 }
