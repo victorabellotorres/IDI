@@ -101,6 +101,7 @@ void MyGLWidget::creaBuffers () {
     for (int i = 0; i < 6; ++i) {
         ColorSuelo[i] = glm::vec3(1.0, 0.0, 0.75);
     }
+    
 
     GLuint VBO_Suelo[2];
     glGenBuffers(2, VBO_Suelo);
@@ -119,7 +120,7 @@ void MyGLWidget::creaBuffers () {
     glBindBuffer(GL_ARRAY_BUFFER, VBO_Suelo[1]);
     glBufferData (GL_ARRAY_BUFFER,
                 sizeof(ColorSuelo),
-                ColorSuelo, GL_STATIC_DRAW); // color// color
+                ColorSuelo, GL_STATIC_DRAW); // color
     
     // Activem l'atribut colorLoc
     glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -175,6 +176,9 @@ void MyGLWidget::initializeGL ( ) {
 
     glEnable (GL_DEPTH_TEST); // acitvar el Z-Buffer
 
+    emit setLabelFloorColor(1.0*255, 0.0*255, 0.75*255);
+    emit setLabelBGColor(0.5*255, 0.7*255, 1.0*255);
+
     //Calculo caja contenedora patricio
     for (int i = 0; i < NUM_MODELS; ++i) {
         centroYAlturaModelo(m[i], centroModelo[i], alturaModelo[i]);
@@ -196,6 +200,7 @@ void MyGLWidget::initializeGL ( ) {
     distanciaVRPOBS = 1.5*radio;
 
     psi = theta = 0;
+    dialPsi = dialTheta = 0;
     current_x = current_y = old_x = old_y = 0;
     mouseActivo = false;
 
@@ -346,8 +351,23 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent* e) {
         
         old_x = current_x;
         old_y = current_y;
+
         viewTransform();
         update();
+
+
+        int degrees_psi = (int(psi*180/M_PI)%360);
+        int degrees_theta = (int(theta*180/M_PI)%360);
+        if (degrees_psi > 180) degrees_psi -= 360;
+        else if (degrees_psi < -180) degrees_psi += 360;
+        if (degrees_theta > 180) degrees_theta -= 360;
+        else if (degrees_theta < -180) degrees_theta += 360;
+
+        dialPsi = degrees_psi*(50/180.0f);
+        dialTheta = degrees_theta*(50/180.0f);
+
+        emit psiChanged(dialPsi);
+        emit thetaChanged(dialTheta);
     }
 }
 
@@ -394,6 +414,49 @@ void MyGLWidget::canviaModel(bool esPatricio) {
     update();
 }
 
+void MyGLWidget::changePsi(int p) {
+    makeCurrent();
+    //p = 50 --> 0º
+    psi += (p-dialPsi)*(M_PI/50.0f); // equivalent to (p-dialPsi)*M_PI/50
+    dialPsi = p;
+    viewTransform();
+    update();
+}
+
+void MyGLWidget::changeTheta(int t) {
+    makeCurrent();
+    //t = 50 --> 0º
+    std::cout << "t: " << t << std::endl;
+    theta += (t-dialTheta)*(M_PI/50.0f); // equivalent to (t-dialTheta)*M_PI/50
+    dialTheta = t;
+    viewTransform();
+    update();
+}
+
+void MyGLWidget::setFloorColor(int r, int g, int b) {
+    makeCurrent();
+    glBindVertexArray(VAO_Suelo);
+    glm::vec3 ColorSuelo[6];
+    for (int i = 0; i < 6; ++i) {
+        ColorSuelo[i] = glm::vec3(r/255.0f, g/255.0f, b/255.0f);
+    }
+    GLuint VBO_Suelo;
+    glGenBuffers(1, &VBO_Suelo);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_Suelo);
+    glBufferData (GL_ARRAY_BUFFER,
+                sizeof(ColorSuelo),
+                ColorSuelo, GL_STATIC_DRAW); // color
+    // Activem l'atribut colorLoc
+    glVertexAttribPointer(colorLoc, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(colorLoc);
+    update();
+}
+
+void MyGLWidget::setBGColor(int r, int g, int b) {
+    makeCurrent();
+    glClearColor(r/255.0f, g/255.0f, b/255.0f, 1.0f);
+    update();
+}
 
 MyGLWidget::~MyGLWidget() {
 }

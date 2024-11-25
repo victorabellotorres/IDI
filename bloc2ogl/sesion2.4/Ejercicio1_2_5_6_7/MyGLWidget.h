@@ -10,8 +10,20 @@ class MyGLWidget : public BL2GLWidget {
   void changeZoom(int z);
   void canviaModel(bool esPatricio);
 
+  void changePsi(int p);
+  void changeTheta(int t);
+
+  void setFloorColor(int r, int g, int b);
+  void setBGColor(int r, int g, int b);
+
   signals:
   void zoomChanged(int z);
+
+  void psiChanged(int p);
+  void thetaChanged(int t);
+
+  void setLabelFloorColor(int r, int g, int b);
+  void setLabelBGColor(int r, int g, int b);
 
   public:
     MyGLWidget(QWidget *parent=0) : BL2GLWidget(parent) {}
@@ -37,8 +49,10 @@ class MyGLWidget : public BL2GLWidget {
   void mouseReleaseEvent(QMouseEvent* e);
   void mouseMoveEvent(QMouseEvent* e);
 
+  private:
+    int printOglError(const char file[], int line, const char func[]);
 
-  // enum models - els models estan en un array de VAOs (VAO_models), aquest enum és per fer més llegible el codi. 
+      // enum models - els models estan en un array de VAOs (VAO_models), aquest enum és per fer més llegible el codi. 
   typedef enum { PATRICIO = 0, LEGO = 1, NUM_MODELS = 2 } ModelType;
   ModelType modelActual;
 
@@ -57,6 +71,7 @@ class MyGLWidget : public BL2GLWidget {
   float zoom;
 
   float psi, theta;// Ψ, Θ   (φ esta última sería phi)
+  float dialPsi, dialTheta;
 
   float current_x, current_y, old_x, old_y;
 
@@ -68,7 +83,4 @@ class MyGLWidget : public BL2GLWidget {
   };
 
   ModoProyeccion modoCamara;
-
-  private:
-    int printOglError(const char file[], int line, const char func[]);
 };
