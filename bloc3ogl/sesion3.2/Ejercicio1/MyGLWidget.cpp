@@ -69,19 +69,33 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
 void MyGLWidget::keyPressEvent(QKeyEvent* event) {
   makeCurrent();
   switch (event->key()) {
-  /*case : 
-      ...
-      break;
-  */  
     default: BL3GLWidget::keyPressEvent(event); break;
   }
   update();
 }
 
+void MyGLWidget::initializeGL() {
+  BL3GLWidget::initializeGL();
+
+  carregaShadersFocus();
+
+  posFocus = glm::vec3(0.0, 0.0 ,0.0);
+  colorFocus = glm::vec3(0.8, 0.8, 0.8);
+
+  glUniform3fv(posFocusLoc, 1, &posFocus[0]);
+  glUniform3fv(colorFocusLoc, 1, &colorFocus[0]);
+}
+
+void MyGLWidget::carregaShadersFocus() {
+
+  posFocusLoc = glGetUniformLocation(program->programId(), "posFocus");
+  colorFocusLoc = glGetUniformLocation(program->programId(), "colorFocus");
+}
+
 void MyGLWidget::iniMaterialTerra ()
 {
   // Donem valors al material del terra
-  amb = glm::vec3(0.0,0.0,0.1);
+  amb = glm::vec3(0.0,0.0,0.3);
   diff = glm::vec3(0.3, 0.3, 1.0);
   spec = glm::vec3(0.8, 0.8, 1.0);
   shin = 15;
