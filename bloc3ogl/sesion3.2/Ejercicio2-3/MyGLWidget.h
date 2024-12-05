@@ -16,12 +16,17 @@ class MyGLWidget : public BL3GLWidget {
 
     void carregaShadersFocus();
 
+    void changeFocus();
+
   private:
     int printOglError(const char file[], int line, const char func[]);
 
     glm::vec3 posFocus, colorFocus;
 
     GLuint posFocusLoc, colorFocusLoc;
+
+    enum typeFocus {focusCamera, focusFix};
+    typeFocus focus;
 
 
 };

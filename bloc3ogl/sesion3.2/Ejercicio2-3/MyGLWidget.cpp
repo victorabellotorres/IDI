@@ -69,6 +69,10 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
 void MyGLWidget::keyPressEvent(QKeyEvent* event) {
   makeCurrent();
   switch (event->key()) {
+    case Qt::Key_F: {
+      changeFocus();
+      break;
+    }
     default: BL3GLWidget::keyPressEvent(event); break;
   }
   update();
@@ -79,7 +83,8 @@ void MyGLWidget::initializeGL() {
 
   carregaShadersFocus();
 
-  posFocus = glm::vec3(0.0, 0.0 ,0.0);
+  focus = focusFix;
+  posFocus = glm::vec3(1.0, 1.0 ,1.0);
   colorFocus = glm::vec3(0.8, 0.8, 0.8);
 
   glUniform3fv(posFocusLoc, 1, &posFocus[0]);
@@ -98,6 +103,19 @@ void MyGLWidget::iniMaterialTerra ()
   amb = glm::vec3(0.0,0.0,0.3);
   diff = glm::vec3(0.3, 0.3, 1.0);
   spec = glm::vec3(0.8, 0.8, 1.0);
-  shin = 40;
+  shin = 100;
 }
 
+void MyGLWidget::changeFocus() {
+  if (focus == focusFix) {
+    focus = focusCamera;
+    posFocus = glm::vec3(0.0, 0.0, 0.0);
+  }
+  else {
+    focus = focusFix;
+    glm::vec4 posFocus_tmp = View * glm::vec4(1.0, 1.0, 1.0, 1.0);
+    posFocus = glm::vec3(posFocus_tmp);
+  }
+
+  glUniform3fv(posFocusLoc, 1, &posFocus[0]);
+}
