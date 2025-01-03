@@ -1,4 +1,3 @@
-#define GLM_FORCE_RADIANS
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLWidget>
 #include <QOpenGLShader>

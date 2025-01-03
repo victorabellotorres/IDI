@@ -35,43 +35,46 @@ class ExamGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     virtual void mouseReleaseEvent (QMouseEvent *event);
     virtual void mouseMoveEvent (QMouseEvent *event);
     
-    virtual void iniMaterialCub ();
     virtual void modelTransformTerra ();
     virtual void modelTransformPatricio ();
-    virtual void modelTransformCub (float escala, float angle);
-    virtual void enviaColFocus ();
+    virtual void modelTransformAvio ();
+    virtual void modelTransformHangar ();
     virtual void iniEscena ();
     virtual void iniCamera ();
     virtual void projectTransform ();
     virtual void viewTransform ();
+    virtual void enviaPosFocus ();
+    virtual void iniMaterialTerra ();
 
     void creaBuffersPatricio ();
+    void creaBuffersAvio ();
+    void creaBuffersHangar ();
     void creaBuffersTerra ();
-    void creaBuffersCub ();
     void carregaShaders ();
-    void calculaCapsaModel (Model &p, float &escala, glm::vec3 &centreBase);
+    void calculaCapsaModel (bool avio, Model &p, float &escala, glm::vec3 &centreBase);
 
     // VAO names
-    GLuint VAO_Patr, VAO_Cub, VAO_Terra;
+    GLuint VAO_Patr, VAO_Avio, VAO_Hang, VAO_Terra;
     // Program
     QOpenGLShaderProgram *program;
     // Viewport
     GLint ample, alt;
     // uniform locations
-    GLuint transLoc, projLoc, viewLoc, colfocusLoc;
+    GLuint transLoc, projLoc, viewLoc, posfocusLoc;
     // attribute locations
     GLuint vertexLoc, normalLoc, matambLoc, matdiffLoc, matspecLoc, matshinLoc;
 
     // Matriu de posició i orientació
     glm::mat4 View;
-    // Matriu de transformació del model
-    glm::mat4 TG;
+    // Matriu de transformació de l'avio
+    glm::mat4 TGAvio;
 
-    // model
-    Model patr;
-    // paràmetres calculats a partir de la capsa contenidora del model
-    glm::vec3 centreBasePat;
-    float escala;
+    // models
+    Model patr, avio, hang;
+    // paràmetres calculats a partir de la capsa contenidora dels models
+    glm::vec3 centreBasePat, centreBaseAvio, centreBaseHang;
+    float escalaPat, escalaAvio, escalaHang;
+    glm::vec3 capsaAvioMax, capsaAvioMin;
 
     glm::vec3 centreEsc;
     float radiEsc, ra, fov, zn, zf;
@@ -80,9 +83,9 @@ class ExamGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     glm::vec3 amb, diff, spec;
     float shin;
 
-    glm::vec3 colFoc;
+    glm::vec3 posFocusAvio, posFoc;
     float angleX, angleY;
-    bool camPlanta;
+    bool camera2;
 
     typedef  enum {NONE, ROTATE} InteractiveAction;
     InteractiveAction DoingInteractive;

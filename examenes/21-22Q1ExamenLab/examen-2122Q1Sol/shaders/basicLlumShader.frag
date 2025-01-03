@@ -11,13 +11,13 @@ out vec4 FragColor;
 
 // Valors per als components que necessitem dels focus de llum
 vec3 llumAmbient = vec3(0.2, 0.2, 0.2);
-vec3 posFocus = vec3(0, 0, 0);
+vec3 colFocus = vec3(1, 1, 1);
 
 uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 TG;
 
-uniform vec3 colFocus;
+uniform vec3 posFocus;
 
 vec3 Lambert (vec3 NormSCO, vec3 L) 
 {
@@ -56,5 +56,10 @@ vec3 Phong (vec3 NormSCO, vec3 L, vec4 vertSCO)
 
 void main()
 {	
-    FragColor = vec4(fmatdiff,1);
+    // Cal modificar aquesta funció per fer el càlcul de l'exercici 3
+    vec3 normalizedNormSCO = normalize(normalSCO);
+    vec3 L = normalize(posFocus - vertexSCO.xyz);
+
+    vec3 color = Phong(normalizedNormSCO, L, vertexSCO);
+    FragColor = vec4(color, 1);
 }

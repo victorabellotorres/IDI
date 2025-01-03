@@ -27,8 +27,10 @@ void main()
     fmatdiff = matdiff;
     fmatspec = matspec;
     fmatshin = matshin;
+
     mat3 normalMatrix = inverse(transpose(mat3 (view * TG)));
     normalSCO = vec3(normalMatrix * normal);
     vertexSCO = view * TG * vec4(vertex, 1);
+    
     gl_Position = proj * view * TG * vec4 (vertex, 1.0);
 }
