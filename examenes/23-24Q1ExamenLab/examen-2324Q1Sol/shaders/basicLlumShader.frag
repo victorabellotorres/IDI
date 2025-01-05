@@ -13,6 +13,8 @@ out vec4 FragColor;
 vec3 llumAmbient = vec3(0.2, 0.2, 0.2);
 vec3 colFocus = vec3(1, 1, 1);
 
+uniform vec3 posFocus;
+
 vec3 Ambient() {
     return llumAmbient * fmatamb;
 }
@@ -50,13 +52,11 @@ vec3 Especular (vec3 NormSCO, vec3 L, vec4 vertSCO, vec3 colorFocus)
 
 void main()
 {	
-    // Cal modificar aquesta funció per fer els càlculs d'il·luminació
-    // ...
-//     FragColor = vec4(fmatdiff,1);
 
+    vec3 normalSCO2 = normalize(normalSCO);
+    vec3 L = normalize(posFocus - vertexSCO.xyz);
 
-    vec3 normalAux = normalize(normalSCO);
-    vec3 L = normalize(-vertexSCO.xyz);
-    vec3 color = Ambient() + Difus(normalAux, L, colFocus) + Especular(normalAux,L,vertexSCO,colFocus);
-   FragColor = vec4(color,1);
+    vec3 color = Ambient() + Difus(normalSCO2, L, colFocus) + Especular(normalSCO2, L, vertexSCO, colFocus);
+
+    FragColor = vec4(color,1);
 }
